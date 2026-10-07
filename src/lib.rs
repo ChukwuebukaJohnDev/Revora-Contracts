@@ -399,21 +399,21 @@ mod test_compute_share_invariants;
 mod test_duplicates;
 #[cfg(test)]
 mod test_epoch_boundary_report;
+#[cfg(test)]
+mod test_estimate_transfer;
 mod test_event_indexed_v2;
 #[cfg(test)]
 mod test_event_indexed_v3;
 #[cfg(test)]
 mod test_merkle_canonical_order;
 #[cfg(test)]
-mod test_pending_issuer_transfer;
-#[cfg(test)]
 mod test_min_revenue_threshold_boundary;
+#[cfg(test)]
+mod test_pending_issuer_transfer;
 #[cfg(test)]
 mod test_testnet_mode;
 #[cfg(test)]
 mod test_time_windows;
-#[cfg(test)]
-mod test_estimate_transfer;
 // #[cfg(test)]
 // mod test_claim_transfer_fail;
 #[cfg(test)]
@@ -427,14 +427,14 @@ mod test_compute_share_decomposition_prop;
 #[cfg(test)]
 mod test_disclosure;
 #[cfg(test)]
-mod test_get_payment_token;
-#[cfg(test)]
 mod test_faucet_metrics;
 /// Self-test module providing a `self_test()` entrypoint that runs contract-internal
 #[cfg(test)]
 mod test_faucet_seed;
 #[cfg(test)]
 mod test_freeze_reason_bitmask;
+#[cfg(test)]
+mod test_get_payment_token;
 #[cfg(test)]
 mod test_multi_token_independence;
 #[cfg(test)]
@@ -16050,19 +16050,19 @@ impl RevoraRevenueShare {
 }
 
 #[cfg(test)]
+mod secondary_market_royalty_adversarial_test;
+#[cfg(test)]
 mod test_deferred_priority;
 #[cfg(test)]
 mod test_deposit_revenue_adversarial;
 #[cfg(test)]
 mod test_merkle_proof_depth;
 #[cfg(test)]
+mod test_offering_count_adversarial;
+#[cfg(test)]
 mod test_snapshot_voting_weight;
 #[cfg(test)]
 mod test_storage_layout_version;
-#[cfg(test)]
-mod secondary_market_royalty_adversarial_test;
-#[cfg(test)]
-mod test_offering_count_adversarial;
 
 // ── Issue #1090: adversarial coverage for get_offerings_page ────────────────
 //
@@ -16119,7 +16119,16 @@ mod issue_1090_get_offerings_page_adversarial_tests {
         let mut tokens = Vec::new(env);
         for i in 0..n {
             let token = Address::generate(env);
-            reg(env, client, issuer, namespace, &token, 1_000_u32.saturating_add(i), &denomination, 0);
+            reg(
+                env,
+                client,
+                issuer,
+                namespace,
+                &token,
+                1_000_u32.saturating_add(i),
+                &denomination,
+                0,
+            );
             tokens.push_back(token);
         }
         tokens
@@ -16140,7 +16149,8 @@ mod issue_1090_get_offerings_page_adversarial_tests {
         assert_eq!(client.get_offering_count(&issuer_a, &namespace_a), 3);
         assert_eq!(client.get_offering_count(&issuer_a, &namespace_b), 5);
 
-        let (page_a, cursor_a) = client.get_offerings_page(&issuer_a, &namespace_a, &0, &MAX_PAGE_LIMIT);
+        let (page_a, cursor_a) =
+            client.get_offerings_page(&issuer_a, &namespace_a, &0, &MAX_PAGE_LIMIT);
         assert_eq!(page_a.len(), 3);
         assert_eq!(cursor_a, None);
         for i in 0..3 {
@@ -16179,7 +16189,16 @@ mod issue_1090_get_offerings_page_adversarial_tests {
         let mut shared_b = Vec::new(&env);
         for i in 0..4_u32 {
             let token_a = Address::generate(&env);
-            reg(&env, &client, &issuer_a, &shared, &token_a, 100_u32.saturating_add(i), &denomination, 0);
+            reg(
+                &env,
+                &client,
+                &issuer_a,
+                &shared,
+                &token_a,
+                100_u32.saturating_add(i),
+                &denomination,
+                0,
+            );
             shared_a.push_back(token_a);
             if i < 2 {
                 let token_b = Address::generate(&env);
@@ -16225,7 +16244,8 @@ mod issue_1090_get_offerings_page_adversarial_tests {
         let tokens = seed(&env, &client, &issuer, &namespace, 5);
 
         // start == count - 1 with a limit larger than the remainder.
-        let (last, last_cursor) = client.get_offerings_page(&issuer, &namespace, &4, &MAX_PAGE_LIMIT);
+        let (last, last_cursor) =
+            client.get_offerings_page(&issuer, &namespace, &4, &MAX_PAGE_LIMIT);
         assert_eq!(last.len(), 1);
         assert_eq!(last_cursor, None);
         assert_eq!(last.get(0).unwrap().token, tokens.get(4).unwrap());
